@@ -2,13 +2,13 @@ import { Dataset, createPlaywrightRouter, sleep } from "crawlee";
 
 export const router = createPlaywrightRouter();
 
-router.addDefaultHandler(async ({ page, request, enqueueLinks, log, browserController, infiniteScroll, proxyInfo }) => {
+router.addDefaultHandler(async ({ page, request, log, infiniteScroll, proxyInfo }) => {
   const context = page.context();
-  context.grantPermissions(["geolocation"]);
+  // Allow location access
+  await context.grantPermissions(["geolocation"]);
   const title = await page.title();
   log.info(`${title}`, { url: request.loadedUrl });
   console.log(proxyInfo)
-  // Allow location access
   await page.click('[aria-label="Change delivery address"]');
   await page.fill("input#location-input", "56 Choa Chu Kang North 6, Yew Mei Green Condominium - 56 Choa Chu Kang North 6, Singapore, 689577");
   await page.click('ul[role="listbox"] li:nth-child(1)');
@@ -59,7 +59,6 @@ router.addDefaultHandler(async ({ page, request, enqueueLinks, log, browserContr
       .locator("a")
       .getAttribute("href")
       .then((url) => url.split("/").pop());
-    // !PEnding
     // const restaurantNotice = await restaurant.locator("")
     await Dataset.pushData({
       restaurantName,
@@ -75,17 +74,5 @@ router.addDefaultHandler(async ({ page, request, enqueueLinks, log, browserContr
   }
 
   await Dataset.exportToJSON("data");
-  // log.info(`enqueueing new URLs`);
-  // await enqueueLinks({
-  //     globs: ['https://crawlee.dev/**'],
-  //     label: 'detail',
-  // });
+
 });
-
-// router.addHandler('detail', async ({ request, page, log, pushData }) => {
-
-//     await pushData({
-//         url: request.loadedUrl,
-//         title,
-//     });
-// });
